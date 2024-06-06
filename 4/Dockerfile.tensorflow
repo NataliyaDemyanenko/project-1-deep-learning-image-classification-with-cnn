@@ -1,0 +1,27 @@
+# Use Ubuntu 20.04 as the base image
+FROM ubuntu:20.04
+
+# Install curl and gnupg
+RUN apt-get update && \
+    apt-get install -y curl gnupg
+
+# Install the server
+RUN echo "deb [arch=amd64] http://storage.googleapis.com/tensorflow-serving-apt stable tensorflow-model-server tensorflow-model-server-universal" | tee /etc/apt/sources.list.d/tensorflow-serving.list \
+ && curl https://storage.googleapis.com/tensorflow-serving-apt/tensorflow-serving.release.pub.gpg | apt-key add - \
+ && apt-get update \
+ && DEBIAN_FRONTEND=noninteractive \
+    apt-get install --no-install-recommends --assume-yes \
+      tensorflow-model-server
+
+# Install TensorFlow Model Server
+RUN echo "deb [arch=amd64] http://storage.googleapis.com/tensorflow-serving-apt stable tensorflow-model-server tensorflow-model-server-universal" | tee /etc/apt/sources.list.d/tensorflow-serving.list \
+ && curl https://storage.googleapis.com/tensorflow-serving-apt/tensorflow-serving.release.pub.gpg | apt-key add - \
+ && apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends --assume-yes \
+    tensorflow-model-server
+
+# Copy local models into the image
+COPY saved_model.pb /app/saved_model.pb
+
+# Specify the command to run when the container starts
+CMD ["/usr/bin/tensorflow_model_server", "--port=8500", "--rest_api_port=8501", "--model_config_file=/models/model.conf", "--model_base_path=/models"]

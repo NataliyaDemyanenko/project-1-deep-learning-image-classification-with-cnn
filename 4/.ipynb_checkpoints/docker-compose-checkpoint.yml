@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  application:
+    build: .
+    ports:
+      - '8000:80'
+    environment:
+      - TENSORFLOW_URL=http://tf:8500  
+
+  tf:
+    build:
+      context: .
+      dockerfile: Dockerfile.tensorflow
